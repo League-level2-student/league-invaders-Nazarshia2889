@@ -1,4 +1,5 @@
 import java.awt.Color;
+
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -25,6 +26,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
     Font endFontThree;
     
     Timer frameDraw;
+    
+    Rocketship rocket = new Rocketship(250, 700, 50, 50);
+    ObjectManager objects = new ObjectManager(rocket);
     
     GamePanel(){
     	titleFont = new Font("Arial", Font.PLAIN, 48);
@@ -57,7 +61,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		
 	}
 	void updateGameState() {
-		
+		rocket.update();
+		objects.update();
 	}
 	void updateEndState() {
 		
@@ -83,6 +88,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 	void drawGameState(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, LeagueInvaders.WIDTH, LeagueInvaders.HEIGHT);
+		
+		objects.draw(g);
 	}
 	void drawEndState(Graphics g) {
 		g.setColor(Color.RED);
@@ -136,24 +143,38 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		    }
 		}   
 		if(currentState == GAME) {
-			if (e.getKeyCode()==KeyEvent.VK_UP) {
-			    System.out.println("UP");
+			if(rocket.x < WIDTH || rocket.x > 0 || rocket.y < HEIGHT || rocket.y > 0) {
+				if (e.getKeyCode()==KeyEvent.VK_UP) {
+					rocket.up = true;
+				}
+				else if (e.getKeyCode()==KeyEvent.VK_DOWN) {
+					rocket.down = true;
+				}
+				else if (e.getKeyCode()==KeyEvent.VK_RIGHT) {
+					rocket.right = true;
+				}
+				else if (e.getKeyCode()==KeyEvent.VK_LEFT) {
+					rocket.left = true;
+				}
 			}
-			else if (e.getKeyCode()==KeyEvent.VK_DOWN) {
-			    System.out.println("DOWN");
+
 			}
-			else if (e.getKeyCode()==KeyEvent.VK_RIGHT) {
-			    System.out.println("RIGHT");
-			}
-			else if (e.getKeyCode()==KeyEvent.VK_LEFT) {
-			    System.out.println("LEFT");
-			}
-		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
-		
+		if (e.getKeyCode()==KeyEvent.VK_UP) {
+			rocket.up = false;
+		}
+		else if (e.getKeyCode()==KeyEvent.VK_DOWN) {
+			rocket.down = false;
+		}
+		else if (e.getKeyCode()==KeyEvent.VK_RIGHT) {
+			rocket.right = false;
+		}
+		else if (e.getKeyCode()==KeyEvent.VK_LEFT) {
+			rocket.left = false;
+		}
 	}
 }
