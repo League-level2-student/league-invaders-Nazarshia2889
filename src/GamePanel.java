@@ -6,7 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -26,9 +28,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
     Font endFontThree;
     
     Timer frameDraw;
+    Timer alienSpawn;
     
     Rocketship rocket = new Rocketship(250, 700, 50, 50);
     ObjectManager objects = new ObjectManager(rocket);
+    
+    public static BufferedImage image;
+    public static boolean needImage = true;
+    public static boolean gotImage = false;	
     
     GamePanel(){
     	titleFont = new Font("Arial", Font.PLAIN, 48);
@@ -41,6 +48,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
     	
     	frameDraw = new Timer(1000/60, this);
     	frameDraw.restart();
+    	
+    	if (needImage) {
+    	    loadImage ("space.png");
+    	}
     }
 	
 	@Override
@@ -61,12 +72,19 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		
 	}
 	void updateGameState() {
-		rocket.update();
-		objects.update();
+		if(rocket.isActive = false) {
+			currentState = END;
+			//System.out.println("Active");
+		}
+		else if(rocket.isActive = true) {
+			rocket.update();
+			objects.update();
+		}
 	}
 	void updateEndState() {
 		
 	}
+
 	
 	
 	void drawMenuState(Graphics g){
@@ -88,7 +106,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 	void drawGameState(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, LeagueInvaders.WIDTH, LeagueInvaders.HEIGHT);
-		
+		if (gotImage) {
+			g.drawImage(image, 0, 0, LeagueInvaders.WIDTH, LeagueInvaders.HEIGHT, null);
+		} else {
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, LeagueInvaders.WIDTH, LeagueInvaders.HEIGHT);
+		}
 		objects.draw(g);
 	}
 	void drawEndState(Graphics g) {
@@ -101,11 +124,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		
 		g.setFont(endFontTwo);
 		g.setColor(Color.YELLOW);
-		g.drawString("You killed enemies", 120, 300);
+		g.drawString("You killed " + objects.getScore() + " enemies ", 120, 300);
 		
 		g.setFont(endFontThree);
 		g.setColor(Color.YELLOW);
 		g.drawString("Press ENTER to restart", 65, 450);
+	}
+	
+	void startGame() {
+		alienSpawn = new Timer(1000, objects);
+		alienSpawn.start();
+		
 	}
 
 	@Override
@@ -121,7 +150,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		    updateEndState();
 		}
 		
-		System.out.println("action");
+		
 		repaint();
 
 	}
@@ -138,12 +167,22 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		if (e.getKeyCode()==KeyEvent.VK_ENTER) {
 		    if (currentState == END) {
 		        currentState = MENU;
-		    } else {
+		    } 
+		    else {
 		        currentState++;
+		        if(currentState==GAME) {
+		        	startGame();
+		        }
+		        if(currentState == END) {
+		        	Rocketship rocket = new Rocketship(250, 700, 50, 50);
+		        	ObjectManager objects = new ObjectManager(rocket);
+		        }
+		        if(currentState == MENU) {
+		        	objects.score = 0;
+		        }
 		    }
 		}   
 		if(currentState == GAME) {
-			if(rocket.x < WIDTH || rocket.x > 0 || rocket.y < HEIGHT || rocket.y > 0) {
 				if (e.getKeyCode()==KeyEvent.VK_UP) {
 					rocket.up = true;
 				}
@@ -156,10 +195,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 				else if (e.getKeyCode()==KeyEvent.VK_LEFT) {
 					rocket.left = true;
 				}
+				
+				if(e.getKeyCode()==KeyEvent.VK_SPACE) {
+					objects.addProjectile(rocket.getProjectile());
+				}
 			}
+		if(currentState == END) {
+			alienSpawn.stop();
+		}
 
 			}
-	}
+	
 
 	@Override
 	public void keyReleased(KeyEvent e) {
@@ -176,5 +222,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		else if (e.getKeyCode()==KeyEvent.VK_LEFT) {
 			rocket.left = false;
 		}
+	}
+	
+	void loadImage(String imageFile) {
+	    if (needImage) {
+	        try {
+	            image = ImageIO.read(this.getClass().getResourceAsStream(imageFile));
+		    gotImage = true;
+	        } catch (Exception e) {
+	            
+	        }
+	        needImage = false;
+	    }
 	}
 }
