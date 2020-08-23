@@ -84,12 +84,12 @@ public class ObjectManager implements ActionListener{
 	
 	void checkCollision() {
 		for(int i = 0;i<aliens.size();i++){
+			Alien s = aliens.get(i);
+			if(rocket.collisionBox.intersects(s.collisionBox)) {
+				rocket.isActive = false;
+				s.isActive = false;
+			}
 			for(int j = 0;j<projectiles.size();j++) {
-				Alien s = aliens.get(i);
-				if(rocket.collisionBox.intersects(s.collisionBox)) {
-					rocket.isActive = false;
-					s.isActive = false;
-				}
 				Projectile ss = projectiles.get(j);
 				if(ss.collisionBox.intersects(s.collisionBox)) {
 					ss.isActive = false;
